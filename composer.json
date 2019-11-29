@@ -1,0 +1,12 @@
+{
+    "autoload": {
+        "classmap": [
+            "core",
+            "app"
+        ]
+    },
+    "require": {
+        "blueimp/jquery-file-upload": "^9.21",
+        "plasticbrain/php-flash-messages": "^1.0"
+    }
+}
