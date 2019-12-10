@@ -9,7 +9,7 @@ class FrontController
 {
     private static $ruta;
 
-    public static function inicio()
+    public static function inicio() 
     {
         list($controlador, $metodo, $argumento) = Router::analizarUri();
 

@@ -5,6 +5,7 @@ namespace Core;
 use Core\Helpers\Redireccion;
 use Core\Librerias\Http;
 use Core\Librerias\Module;
+use Core\Librerias\Solicitud;
 use Plasticbrain\FlashMessages\FlashMessages;
 
 interface IController
@@ -30,7 +31,7 @@ class Controller extends Module
 {
     public $view;
     public $redirect;
-
+    protected $solicitud;
     public function __construct($metodo, $argumento)
     {
         parent::__construct();
@@ -38,6 +39,7 @@ class Controller extends Module
             $this->view = new View();
             $this->redirect = new Redireccion();
             $this->mensaje = new FlashMessages();
+            $this->solicitud = new Solicitud();
             call_user_func([$this, $metodo], $argumento);
         } else {
             Http::exit_by_forbiden();

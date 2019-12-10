@@ -24,7 +24,7 @@ class ManejadorSession extends Model
 
     public static function redirecionarlogin()
     {
-        header('Location: '.APP_DIR.'login');
+        header('Location: ' . APP_DIR . 'login');
         exit();
     }
 
@@ -36,8 +36,8 @@ class ManejadorSession extends Model
             self::verificarUserdatos($user, $pass);
         } else {
             if (!isset($_GET['info'])) {
-                self::destruirSession();
-                exit();
+                    self::destruirSession();
+                    exit();
             }
         }
     }
@@ -47,7 +47,7 @@ class ManejadorSession extends Model
         //Validación de los datos de accesos indicados por el usuario;
         $empleado_model = new Empleado();
         $usuario = $empleado_model->getUserInfo($user);
-
+        var_dump($usuario->emp_id);
         if (isset($usuario->emp_id)) {
             $usuario_personales = $empleado_model->getUserPerData($usuario->emp_id);
             $usuario_datos = [
@@ -65,10 +65,11 @@ class ManejadorSession extends Model
             if (password_verify($pass, $usuario->emp_password)) {
                 self::inicioSession($usuario_datos);
             } else {
-                self::destruirSession();
+
+             //   self::destruirSession();
             }
         } else {
-            self::destruirSession();
+           // self::destruirSession();
         }
     }
 
@@ -78,7 +79,7 @@ class ManejadorSession extends Model
         session_start();
         $_SESSION['logueado'] = '1';
         $_SESSION['user_data'] = $usuario_datos;
-        header('Location: '.APP_DIR);
+        header('Location: ' . APP_DIR);
         exit();
     }
 

@@ -9,15 +9,15 @@
 
 namespace Core\Librerias;
 
+use Core\BaseDeDatos;
 use Core\ManejadorSession;
-use Core\Model;
 
 /**
  * Class Module.
  */
 class Module
 {
-    protected $db = null;
+
     private $module_id;
 
     /**
@@ -28,11 +28,11 @@ class Module
     public function __construct($module_id = null)
     {
         ManejadorSession::verificarSession();
-        $this->db = new Model();
+        $this->db = BaseDeDatos::getInstance();
         $this->module_id = $module_id;
         if (null !== $this->module_id) {
             if (!$this->has_module_permission($this->module_id, $_SESSION['user_data']['emp_id'])) {
-                Http::error_response();
+                Http::notFound();
             }
         }
     }
@@ -50,7 +50,7 @@ class Module
 					AND emp_id = {$emp_id}";
 
         //Si no es  module_id null, permite el acceso
-        if (!$this->db->count($sql)) {
+        if (!$this->db->consultar($sql)->count()) {
             return false;
         }
 
@@ -66,7 +66,7 @@ class Module
     {
         $sql = "select * from app_modules where module_id = '$module_id'";
 
-        return $this->db->row($sql);
+        return $this->db->consultar($sql)->row();
     }
 
     /**
@@ -79,7 +79,7 @@ class Module
         $sql = "select * from app_modules
 				where module_id = '{$module_id}'";
 
-        return $this->db->all($sql);
+        return $this->db->consultar($sql)->all();
     }
 
     /**
@@ -89,7 +89,7 @@ class Module
     {
         $sql = 'select * from app_modules order by module_parentid asc';
 
-        return $this->db->all($sql);
+        return $this->db->consultar($sql)->all();
     }
 
     /**
@@ -104,7 +104,7 @@ class Module
 					where app_permissions.emp_id = '{$emp_id}'
 					and app_modules.module_parentid ='' order by sort asc";
 
-        return $this->db->all($sql);
+        return $this->db->consultar($sql)->all();
     }
 
     /**
@@ -120,7 +120,7 @@ class Module
 				where app_modules.module_parentid = '{$module_parentid}'
 				and app_permissions.emp_id = '{$emp_id}'  order by sort asc";
 
-        return $this->db->all($sql);
+        return $this->db->consultar($sql)->all();
     }
 
     public function countHaveSubMenu(string $emp_id, string $module_parentid)
@@ -130,7 +130,7 @@ class Module
 				where app_modules.module_parentid = '{$module_parentid}'
 				and app_permissions.emp_id = '{$emp_id}'";
 
-        return $this->db->count($sql);
+        return $this->db->consultar($sql)->count();
     }
 
     /**
@@ -139,7 +139,7 @@ class Module
     public function check_action_permission(string $action_id)
     {
         if (!$this->has_module_action_permission($this->module_id, $action_id, session('id'))) {
-            header('Location:'.base_url().'403');
+            header('Location:' . base_url() . '403');
             exit;
         }
     }
@@ -159,7 +159,7 @@ class Module
 				  		and action_id = '$action_id'";
 
         //Si no es  module_id null, permite el acceso
-        if (!$this->db->count($sql)) {
+        if (!$this->db->consultar($sql)->count()) {
             return false;
         }
 

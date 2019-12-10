@@ -1,5 +1,5 @@
 <?php
-
+declare (strict_types = 1);
 namespace App\Controladores;
 
 use App\Modelos\Empleado;
@@ -13,12 +13,13 @@ class EmpleadosControlador extends Controller
 {
     public $moduleAction;
     public $module;
-    private $empleadoModel;
+    private $empleado;
 
-    public function __construct($metodo, $argumento)
+    public function __construct(string $metodo,   $argumento)
     {
+
         $this->module = new Module('empleados');
-        $this->empleadoModel = new Empleado();
+        $this->empleado = new Empleado();
         $this->moduleAction = new ModuleAction();
         parent::__construct($metodo, $argumento);
     }
@@ -30,17 +31,17 @@ class EmpleadosControlador extends Controller
 
     public function obtenerEmpleados()
     {
-        Http::json_response($this->empleadoModel->empleadosInfo());
+        Http::json_response($this->empleado->empleadosInfo());
     }
 
     public function ver($argumento)
     {
         // obtener informacion del empleado enviada via get
-        (!$this->empleadoModel->existeEmpleado($argumento) ? Http::error_response() : true);
+        (!$this->empleado->existeEmpleado($argumento) ? Http::notFound() : true);
         $data = [
             'all_modules' => $this->module->getAllModules(),
             'moduleActions' => $this->moduleAction,
-            'empleado' => $this->empleadoModel->obtenerEmpleadosInfoId($argumento),
+            'empleado' => $this->empleado->obtenerEmpleadosInfoId($argumento),
             'emp_id' => $argumento,
         ];
 
@@ -62,7 +63,7 @@ class EmpleadosControlador extends Controller
                 'einfo_pais' => filter_input(INPUT_POST, 'pais', FILTER_SANITIZE_STRING),
             ];
 
-            if ($this->empleadoModel->guardarEmpleadoInfo($data_form)) {
+            if ($this->empleado->guardarEmpleadoInfo($data_form)) {
                 $data = true;
             } else {
                 $data = false;
@@ -75,7 +76,7 @@ class EmpleadosControlador extends Controller
     {
         if ('GET' === $_SERVER['REQUEST_METHOD']) {
             $id = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
-            Http::json_response($this->empleadoModel->obtenerEmpleadosInfoId($id));
+            Http::json_response($this->empleado->obtenerEmpleadosInfoId($id));
         }
     }
 
@@ -85,18 +86,18 @@ class EmpleadosControlador extends Controller
             $id = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_NUMBER_INT);
 
             $data_form = [
-                'einfo_nombres' => filter_input(INPUT_POST, 'nombres', FILTER_SANITIZE_STRING),
-                'einfo_apellidos' => filter_input(INPUT_POST, 'apellidos', FILTER_SANITIZE_STRING),
-                'einfo_telefono_movil' => filter_input(INPUT_POST, 'telefono', FILTER_SANITIZE_STRING),
-                'einfo_email' => filter_input(INPUT_POST, 'correo', FILTER_SANITIZE_STRIPPED),
-                'einfo_direccion_1' => filter_input(INPUT_POST, 'direccion_uno', FILTER_SANITIZE_STRING),
-                'einfo_direccion_2' => filter_input(INPUT_POST, 'direccion_dos', FILTER_SANITIZE_STRING),
-                'einfo_ciudad' => filter_input(INPUT_POST, 'ciudad', FILTER_SANITIZE_STRING),
-                'einfo_estado' => filter_input(INPUT_POST, 'estado', FILTER_SANITIZE_STRING),
-                'einfo_pais' => filter_input(INPUT_POST, 'pais', FILTER_SANITIZE_STRING),
+                'einfo_nombres' => $this->solicitud->post('nombres'),
+                'einfo_apellidos' => $this->solicitud->post('apellidos'),
+                'einfo_telefono_movil' => $this->solicitud->post('telefono'),
+                'einfo_email' => $this->solicitud->post('correo'),
+                'einfo_direccion_1' => $this->solicitud->post('direccion_uno'),
+                'einfo_direccion_2' => $this->solicitud->post('direccion_dos'),
+                'einfo_ciudad' => $this->solicitud->post('ciudad'),
+                'einfo_estado' => $this->solicitud->post('estado'),
+                'einfo_pais' => $this->solicitud->post('pais'),
             ];
 
-            if ($this->empleadoModel->editarEmpleadoInfo($id, $data_form)) {
+            if ($this->empleado->editarEmpleadoInfo($id, $data_form)) {
                 $data = true;
             } else {
                 $data = false;
@@ -110,13 +111,13 @@ class EmpleadosControlador extends Controller
     {
         if ('GET' === $_SERVER['REQUEST_METHOD']) {
             $id = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
-            $estatus = $this->empleadoModel->estatus($id);
+            $estatus = $this->empleado->estatus($id);
             if ($estatus) {
                 $data = true;
                 if ($estatus->emp_estatus) {
-                    $this->empleadoModel->modificarEstatus($id, 0);
+                    $this->empleado->modificarEstatus($id, 0);
                 } else {
-                    $this->empleadoModel->modificarEstatus($id, 1);
+                    $this->empleado->modificarEstatus($id, 1);
                 }
             } else {
                 $data = false;
@@ -129,7 +130,7 @@ class EmpleadosControlador extends Controller
     {
         if ('GET' === $_SERVER['REQUEST_METHOD']) {
             $id = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
-            if ($this->empleadoModel->eliminarEmpleado($id)) {
+            if ($this->empleado->eliminarEmpleado($id)) {
                 $data = true;
             } else {
                 $data = false;
@@ -140,29 +141,28 @@ class EmpleadosControlador extends Controller
 
     public function guardar($argumento)
     {
-        $token = $_POST['token'];
-        Token::verificaToken(CSRF_TOKEN, $token);
+        Token::verificaToken();
 
         //guardar informacion
         $person_data = [
             'einfo_id' => $argumento,
-            'einfo_nombres' => $_POST['einfo_nombres'],
-            'einfo_apellidos' => $_POST['einfo_apellidos'],
-            'einfo_telefono_movil' => $_POST['einfo_telefono_movil'],
-            'einfo_email' => $_POST['einfo_email'],
-            'einfo_direccion_1' => $_POST['einfo_direccion_1'],
-            'einfo_direccion_2' => $_POST['einfo_direccion_2'],
-            'einfo_ciudad' => $_POST['einfo_ciudad'],
-            'einfo_estado' => $_POST['einfo_estado'],
-            'einfo_pais' => $_POST['einfo_pais'],
+            'einfo_nombres' => $this->solicitud->post('einfo_nombres'),
+            'einfo_apellidos' => $this->solicitud->post('einfo_apellidos'),
+            'einfo_telefono_movil' => $this->solicitud->post('einfo_telefono_movil'),
+            'einfo_email' => $this->solicitud->post('einfo_email'),
+            'einfo_direccion_1' => $this->solicitud->post('einfo_direccion_1'),
+            'einfo_direccion_2' => $this->solicitud->post('einfo_direccion_2'),
+            'einfo_ciudad' => $this->solicitud->post('einfo_ciudad'),
+            'einfo_estado' => $this->solicitud->post('einfo_estado'),
+            'einfo_pais' => $this->solicitud->post('einfo_pais'),
             'einfo_imagenid' => 1,
         ];
 
         // obtener permisos del usuario
-        $permission_data = false !== $_POST['permissions'] ? $_POST['permissions'] : [];
+        $permission_data = false !== $this->solicitud->post('permissions') ? $this->solicitud->post('permissions') : [];
 
         // obtener acciones del usuario
-        $permission_action_data = false !== $_POST['permissions_actions'] ? $_POST['permissions_actions'] : [];
+        $permission_action_data = false !== $this->solicitud->post('permissions_actions') ? $this->solicitud->post('permissions_actions') : [];
 
         // primero se elimina para evitar que se duplique la accion, ya que el usuario puede marcar o no.
         if (null !== $permission_data) {
@@ -180,28 +180,27 @@ class EmpleadosControlador extends Controller
         }
 
         //Cambio de contraseña
-        if ('' !== $_POST['emp_password']) {
+        if ('' !== $this->solicitud->post('emp_password')) {
             $employee_data = [
-                'emp_username' => trim($_POST['emp_username']),
-                'emp_password' => password_hash(trim($_POST['emp_password'], PASSWORD_BCRYPT)),
+                'emp_username' => trim($this->solicitud->post('emp_username')),
+                'emp_password' => password_hash(trim($this->solicitud->post('emp_password'), PASSWORD_BCRYPT)),
             ];
         } else {
             //No cambio de clave
-            $emp_username = '' === trim($_POST['emp_username']) ? null : trim($_POST['emp_username']);
+            $emp_username = '' === trim($this->solicitud->post('emp_username')) ? null : trim($this->solicitud->post('emp_username'));
             $employee_data = [
                 'emp_username' => $emp_username,
             ];
         }
 
-        $this->empleadoModel->store_update(
+        $this->empleado->store_update(
             $person_data,
             $person_data['einfo_id'],
             $employee_data,
             $permission_data,
             $permission_action_data
         );
-
-        return $this->redirect->atras()->mensaje([
+      return $this->redirect->atras()->mensaje([
             'mensaje' => 'Registro creado exitosamente',
             'tipo' => 'success',
         ]);

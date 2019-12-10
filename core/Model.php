@@ -2,108 +2,65 @@
 
 namespace Core;
 
-	class Model extends DbLayer
-	{
-		protected $resultado;
-		protected $user;
-		protected $conexion;
-		protected $statement;
-		protected $sql;
-		protected $data;
+class Model
+{
+    public $db;
+    public function __construct()
+    {
+        $this->db = BaseDeDatos::getInstance();
+    }
 
-		public function __construct()
-		{
-			$this->conexion = null;
-			$this->statement = null;
-			$this->sql = null;
-			$this->data = null;
-			$this->resultado = null;
-			$this->user = null;
-		}
+    public function actualizar($id, $tabla, $data, $where)
+    {
 
-		/***** metodos **/
+        if (!is_array($data)) {
+            $data = (array)$data;
+            unset($data["db"]);
+        }
 
-		public function all($sql)
-		{
-			$this->sql = $sql;
-			$this->statement = $this->conectar()->preparar($sql);
-			$this->statement->execute();
+        $this->sql = "UPDATE $tabla SET ";
 
-			return $this->statement->fetchAll();
-		}
+        foreach ($data as $key => $value) {
+            $this->sql .= $key . "='{$value}',";
+        }
 
-		private function preparar($sql)
-		{
-			return $this->statement = $this->conexion->prepare($sql);
-		}
+        $this->sql = substr($this->sql, 0, -1);
 
-		private function conectar()
-		{
-			$this->conexion = new DbLayer();
+      echo  $this->sql .= " WHERE $where = $id";
 
-			return $this;
-		}
+        return $this->db->consultar($this->sql)->run();
+    }
 
-		public function count($sql)
-		{
-			$this->sql = $sql;
-			$this->statement = $this->conectar()->preparar($sql);
-			$this->statement->execute();
+    public function insertar($tabla, $data, $ultimoId = false)
+    {
+        if (!is_array($data)) {
+            $data = (array)$data;
+            unset($data["db"]);
+        }
 
-			return $this->statement->rowCount();
-		}
+        $this->sql = "INSERT INTO $tabla (";
 
-		public function row($sql)
-		{
-			$this->sql = $sql;
-			$this->statement = $this->conectar()->preparar($sql);
-			$this->statement->execute();
+        foreach ($data as $key => $value) {
+            $this->sql .= $key . ',';
+        }
 
-			return $this->statement->fetch();
-		}
+        $this->sql = substr($this->sql, 0, -1);
+        $this->sql .= ")";
+        $this->sql .= "VALUES (";
 
-		public function __destruct()
-		{
-			$this->conexion = '';
-			$this->conexion = null;
-		}
+        foreach ($data as $key => $value) {
+            $this->sql .= "'{$value}',";
+        }
 
-		public function update($id, $tabla, $data, $where)
-		{
-			if (!is_array($data)) {
-				$data = (array) $data;
-				array_pop($data);
-				array_pop($data);
-				array_pop($data);
-				array_pop($data);
-				array_pop($data);
-				array_pop($data);
-			}
+        $this->sql = substr($this->sql, 0, -1);
+        $this->sql .= ")";
 
-			$this->sql = "UPDATE $tabla SET ";
-			foreach ($data as $key => $value) {
-				$this->sql .= $key."='{$value}',";
-			}
-			$this->sql = substr($this->sql,0,-1);
-			$this->sql .= " WHERE $where = $id";
+        $sql = $this->db->consultar($this->sql)->run();
 
-			return $this->ejecutar($this->sql);
-		}
+        if ($ultimoId === true) {
+            return $this->db->lastInsertId();
+        }
 
-		public function ejecutar($sql)
-		{
-			$this->sql = $sql;
-			$this->statement = $this->conectar()->preparar($sql);
-
-			return $this->statement->execute();
-		}
-
-		private function recorrerArray($array)
-		{
-			foreach ($array as $_array) {
-				$_array[] = $_array;
-			}
-
-			return $_array;
-		}
-	}
+        return $sql;
+    }
+}

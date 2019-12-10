@@ -1,4 +1,5 @@
-<h4 class="page-title">Detalles del empleado <span style="color:red"><?php echo $empleado->einfo_nombres.' '.$empleado->einfo_apellidos; ?></span></h4>
+<h4 class="page-title">Detalles del empleado <span
+            style="color:red"><?php echo $empleado->einfo_nombres . ' ' . $empleado->einfo_apellidos; ?></span></h4>
 <div id="appEmpleados">
     <div class="row">
         <div class="col-md-8">
@@ -31,22 +32,21 @@
                             <div class="tab-pane active show" id="home">
                                 <div class="m-portlet__body">
                                     <!-- vista de informacion basica -->
-									<?php require 'app/Modulos/empleados/vista/form/empleado_permisos.php'; ?>
-
+                                    <?php require 'app/Modulos/empleados/vista/form/empleado_info.php'; ?>
                                     <!-- fin vista informacion basica -->
                                 </div>
                             </div>
                             <div class="tab-pane" id="profile">
                                 <div class="m-portlet__body">
                                     <!-- vista de permisos empleados -->
-									<?php require 'app/Modulos/empleados/vista/form/empleado_user_info.php'; ?>
+                                    <?php require 'app/Modulos/empleados/vista/form/empleado_user_info.php'; ?>
                                     <!-- fin vista permisos basica -->
                                 </div>
                             </div>
                             <div class="tab-pane" id="settings">
                                 <div class="m-portlet__body">
                                     <!-- vista de permisos empleados -->
-									<?php require 'app/Modulos/empleados/vista/form/empleado_info.php'; ?>
+                                    <?php require 'app/Modulos/empleados/vista/form/empleado_permisos.php'; ?>
                                     <!-- fin vista permisos basica -->
                                 </div>
                             </div>
@@ -64,13 +64,14 @@
                 <div class="card-header" style="background-image: url('<?= APP_DIR; ?>public/assets/img/blogpost.jpg')">
                     <div class="profile-picture">
                         <div class="avatar avatar-xl">
-                            <img src="<?= APP_DIR; ?>public/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+                            <img src="<?= APP_DIR; ?>public/assets/img/profile.jpg" alt="..."
+                                 class="avatar-img rounded-circle">
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="user-profile text-center">
-                        <div class="name"><?php echo $empleado->einfo_nombres.' '.$empleado->einfo_apellidos; ?></div>
+                        <div class="name"><?php echo $empleado->einfo_nombres . ' ' . $empleado->einfo_apellidos; ?></div>
                         <div class="desc"><?php echo $empleado->einfo_email; ?></div>
                     </div>
                 </div>
