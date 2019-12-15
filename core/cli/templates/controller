@@ -1,0 +1,40 @@
+<?php
+namespace App\Controladores;
+use Core\Controller;
+
+class ClassNameControlador extends Controller {
+
+    public function __construct($metodo, $argumento)
+    {
+        parent::__construct($metodo, $argumento);
+    }
+
+    public function index() {
+
+    }
+
+    public function crear() {
+  
+    }
+
+    public function editar($id=0) {
+
+    }
+
+    public function guardar() {
+        $id = (isset($_POST['id'])) ? $_POST['id'] : 0;
+        $this->model->property_id = $id;
+        # ...
+        $this->model->save();
+    }
+    
+
+
+    public function eliminar($id=0) {
+        $this->model->property_id = $id;
+        $this->model->eliminar();
+    }
+
+}
+
+?>
